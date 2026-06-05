@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "risk-aware-inspection-prototype"
+version = "0.1.0"
+description = "Research prototype for a risk-aware industrial visual inspection pipeline."
+requires-python = ">=3.10"
+authors = [{name = "Jesse Asemota"}]
+dependencies = [
+    "numpy>=1.24",
+    "opencv-python>=4.8",
+    "pandas>=2.0",
+    "PyYAML>=6.0",
+    "Pillow>=10.0"
+]
+
+[project.optional-dependencies]
+api = ["fastapi>=0.110", "uvicorn>=0.27"]
+ml = ["torch>=2.1"]
+test = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+risk-inspect = "risk_aware_inspection.cli:main"

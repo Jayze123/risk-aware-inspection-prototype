@@ -1,0 +1,243 @@
+image:
+  target_size:
+  - 256
+  - 256
+  apply_clahe: true
+  clahe_clip_limit: 2.0
+  clahe_tile_grid_size:
+  - 8
+  - 8
+detector:
+  name: simple_statistical_reference
+  zscore_clip: 5.0
+  top_percentile: 99.0
+  calibration_quantile: 0.995
+  minimum_threshold: 0.65
+  decision_margin: 0.08
+localisation:
+  heatmap_threshold: 0.42
+  gaussian_blur_kernel: 5
+  morph_kernel_size: 5
+  morph_open_iterations: 1
+  morph_close_iterations: 2
+  min_component_area_px: 35
+  min_component_area_ratio: 0.0006
+  max_boxes: 8
+taxonomy:
+  allowed_labels:
+  - normal
+  - scratch
+  - fracture
+  - dent
+  - contamination
+  - stain
+  - deformation
+  - unknown
+  normal_label: normal
+  unknown_label: unknown
+semantic_rules:
+  elongated_aspect_ratio: 3.2
+  thin_area_ratio_max: 0.025
+  dark_contrast_threshold: 18.0
+  saturation_contrast_threshold: 20.0
+  large_region_ratio: 0.08
+  edge_density_threshold: 0.06
+  minimum_semantic_confidence: 0.35
+risk_inputs:
+  severity_by_label:
+    scratch: S2
+    fracture: S4
+    dent: S3
+    contamination: S3
+    stain: S2
+    deformation: S4
+    unknown: S3
+    normal: S1
+  area_escalation:
+  - min_area_ratio: 0.1
+    minimum_severity: S4
+  - min_area_ratio: 0.04
+    minimum_severity: S3
+  occurrence_prior_by_label:
+    scratch: O2
+    fracture: O1
+    dent: O2
+    contamination: O2
+    stain: O2
+    deformation: O1
+    unknown: O3
+    normal: O1
+  detection_level_by_confidence:
+  - min_confidence: 0.8
+    level: D1
+  - min_confidence: 0.55
+    level: D2
+  - min_confidence: 0.0
+    level: D3
+confidence_fusion:
+  preferred_strategy: minimum
+  strategies_to_record:
+  - minimum
+  - weighted_average
+  weights:
+    anomaly: 0.45
+    localisation: 0.3
+    semantic: 0.25
+gating:
+  minimum_fused_confidence: 0.6
+  near_boundary_margin: 0.07
+  force_review_for_unknown_label: true
+  force_review_for_unmapped_rpm: true
+  force_review_when_no_localisation_for_anomaly: true
+actions:
+  Low: Continue monitoring; no immediate intervention required.
+  Medium: Reinspect item and consider rework if defect is confirmed.
+  High: Quarantine item or lot pending quality engineer review.
+  Critical: Stop release or production path until authorised review is complete.
+  Review Required: Escalate to human reviewer with all visual evidence and confidence
+    values.
+rpm_table:
+- severity: S1
+  occurrence: O1
+  detection: D1
+  risk_class: Low
+- severity: S1
+  occurrence: O1
+  detection: D2
+  risk_class: Low
+- severity: S1
+  occurrence: O1
+  detection: D3
+  risk_class: Low
+- severity: S1
+  occurrence: O2
+  detection: D1
+  risk_class: Low
+- severity: S1
+  occurrence: O2
+  detection: D2
+  risk_class: Low
+- severity: S1
+  occurrence: O2
+  detection: D3
+  risk_class: Medium
+- severity: S1
+  occurrence: O3
+  detection: D1
+  risk_class: Low
+- severity: S1
+  occurrence: O3
+  detection: D2
+  risk_class: Medium
+- severity: S1
+  occurrence: O3
+  detection: D3
+  risk_class: Medium
+- severity: S2
+  occurrence: O1
+  detection: D1
+  risk_class: Low
+- severity: S2
+  occurrence: O1
+  detection: D2
+  risk_class: Low
+- severity: S2
+  occurrence: O1
+  detection: D3
+  risk_class: Medium
+- severity: S2
+  occurrence: O2
+  detection: D1
+  risk_class: Low
+- severity: S2
+  occurrence: O2
+  detection: D2
+  risk_class: Medium
+- severity: S2
+  occurrence: O2
+  detection: D3
+  risk_class: High
+- severity: S2
+  occurrence: O3
+  detection: D1
+  risk_class: Medium
+- severity: S2
+  occurrence: O3
+  detection: D2
+  risk_class: High
+- severity: S2
+  occurrence: O3
+  detection: D3
+  risk_class: High
+- severity: S3
+  occurrence: O1
+  detection: D1
+  risk_class: Low
+- severity: S3
+  occurrence: O1
+  detection: D2
+  risk_class: Medium
+- severity: S3
+  occurrence: O1
+  detection: D3
+  risk_class: Medium
+- severity: S3
+  occurrence: O2
+  detection: D1
+  risk_class: Medium
+- severity: S3
+  occurrence: O2
+  detection: D2
+  risk_class: High
+- severity: S3
+  occurrence: O2
+  detection: D3
+  risk_class: High
+- severity: S3
+  occurrence: O3
+  detection: D1
+  risk_class: Medium
+- severity: S3
+  occurrence: O3
+  detection: D2
+  risk_class: High
+- severity: S3
+  occurrence: O3
+  detection: D3
+  risk_class: Critical
+- severity: S4
+  occurrence: O1
+  detection: D1
+  risk_class: Low
+- severity: S4
+  occurrence: O1
+  detection: D2
+  risk_class: Medium
+- severity: S4
+  occurrence: O1
+  detection: D3
+  risk_class: High
+- severity: S4
+  occurrence: O2
+  detection: D1
+  risk_class: Medium
+- severity: S4
+  occurrence: O2
+  detection: D2
+  risk_class: High
+- severity: S4
+  occurrence: O2
+  detection: D3
+  risk_class: Critical
+- severity: S4
+  occurrence: O3
+  detection: D1
+  risk_class: High
+- severity: S4
+  occurrence: O3
+  detection: D2
+  risk_class: Critical
+- severity: S4
+  occurrence: O3
+  detection: D3
+  risk_class: Critical
