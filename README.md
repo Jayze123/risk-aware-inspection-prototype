@@ -148,3 +148,14 @@ The current prototype has been tested on two MVTec AD categories: ottle and haz
 PatchCore currently gives the strongest overall performance across both tested categories. It achieves high recall, no false positives, and a low human-review rate. PaDiM performs strongly on ottle, but it produces many false positives on hazelnut, which increases the human-review workload. These findings support the dissertation argument that anomaly detector choice affects not only classification performance, but also downstream risk-aware decision support and review efficiency.
 
 Detailed experiment notes are stored in docs/experiments/.
+
+### Capsule semantic fallback update
+
+A semantic fallback rule was added for the capsule category to reduce unnecessary unknown labels. This did not change the detector-level classification metrics, but it reduced the review workload.
+
+| Detector | F1-score | Human review rate before | Human review rate after |
+|---|---:|---:|---:|
+| PatchCore capsule | 0.9815 | 0.6818 | 0.5152 |
+| PaDiM capsule | 0.9432 | 0.8712 | 0.8409 |
+
+This shows that the risk-aware pipeline can be improved at the semantic/governance layer without retraining the anomaly detector.

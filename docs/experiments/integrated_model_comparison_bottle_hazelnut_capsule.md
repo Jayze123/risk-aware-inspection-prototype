@@ -23,10 +23,14 @@
 | Detector | Accuracy | Precision | Recall | F1-score | Human review rate |
 |---|---:|---:|---:|---:|---:|
 | PatchCore integrated | 0.9697 | 0.9907 | 0.9725 | 0.9815 | 0.6818 |
+| PatchCore + semantic fallback v3 | 0.9697 | 0.9907 | 0.9725 | 0.9815 | 0.5152 |
 | PaDiM integrated | 0.9015 | 0.9000 | 0.9908 | 0.9432 | 0.8712 |
+| PaDiM + semantic fallback v3 | 0.9015 | 0.9000 | 0.9908 | 0.9432 | 0.8409 |
 
 ## Interpretation
 
-Across the tested categories, PatchCore is currently the strongest detector for the risk-aware inspection pipeline. It achieves high accuracy, strong precision, high recall and consistently strong F1-scores. PaDiM also performs well in some cases, especially in recall, but it produces more false positives on hazelnut and capsule, which increases the human-review rate.
+Across the tested categories, PatchCore currently provides the strongest overall performance for the risk-aware inspection pipeline. It achieves high accuracy, strong precision, high recall and consistently strong F1-scores across bottle, hazelnut and capsule.
 
-The results show that anomaly detection performance and review workload should be evaluated together. A model with high recall may still be less practical if it causes many normal products to be escalated for review. This supports the dissertation aim of combining anomaly detection with risk-aware governance, confidence fusion and human-review gating rather than reporting detection accuracy alone.
+PaDiM also achieves high recall, but it produces more false positives on hazelnut and capsule. This increases the human-review rate, which makes it less operationally efficient under the current configuration.
+
+The capsule semantic fallback v3 experiment shows that review workload can be reduced without retraining the anomaly detector. PatchCore capsule kept the same F1-score of 0.9815, while its review rate reduced from 0.6818 to 0.5152. This supports the dissertation argument that downstream semantic interpretation and governance rules affect operational decision support independently of detection accuracy.
