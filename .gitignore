@@ -22,3 +22,5 @@ mvtec_anomaly_detection_tar/
 *.egg-info/
 
 .vscode/
+
+results/
