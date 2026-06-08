@@ -28,10 +28,12 @@ taxonomy:
   - normal
   - scratch
   - fracture
+  - crack
   - dent
   - contamination
   - stain
   - deformation
+  - surface_defect
   - unknown
   normal_label: normal
   unknown_label: unknown
@@ -47,10 +49,12 @@ risk_inputs:
   severity_by_label:
     scratch: S2
     fracture: S4
+    crack: S4
     dent: S3
     contamination: S3
     stain: S2
     deformation: S4
+    surface_defect: S3
     unknown: S3
     normal: S1
   area_escalation:
@@ -61,10 +65,12 @@ risk_inputs:
   occurrence_prior_by_label:
     scratch: O2
     fracture: O1
+    crack: O2
     dent: O2
     contamination: O2
     stain: O2
     deformation: O1
+    surface_defect: O2
     unknown: O3
     normal: O1
   detection_level_by_confidence:

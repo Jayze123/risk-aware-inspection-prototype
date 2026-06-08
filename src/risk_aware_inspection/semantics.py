@@ -93,14 +93,19 @@ class RuleBasedSemanticLabeler(SemanticLabeler):
         rule_strength = 0.0
         evidence_rules: list[str] = []
 
+
         if elongated and thin_region and edge_rich and dark:
-            label = "fracture"
+            label = "crack"
             rule_strength = 0.92
-            evidence_rules.append("elongated_thin_dark_edge_rich")
+            evidence_rules.append("elongated_thin_dark_edge_rich_crack_like")
         elif elongated and thin_region:
             label = "scratch"
             rule_strength = 0.78 + 0.10 * float(edge_rich)
             evidence_rules.append("elongated_thin_region")
+        elif edge_rich and dark:
+            label = "crack"
+            rule_strength = 0.74 + 0.08 * float(elongated) + 0.08 * float(thin_region)
+            evidence_rules.append("dark_edge_rich_crack_like_region")
         elif saturated:
             label = "contamination"
             rule_strength = 0.74 + clamp(saturation_contrast / 80.0) * 0.18
@@ -118,9 +123,14 @@ class RuleBasedSemanticLabeler(SemanticLabeler):
             rule_strength = 0.66
             evidence_rules.append("large_irregular_edge_region")
         else:
-            label = self.unknown_label
-            rule_strength = float(self.rule_cfg.get("minimum_semantic_confidence", 0.35))
-            evidence_rules.append("no_rule_matched_confidently")
+            if box.max_heat >= 0.90 and box.area_ratio >= 0.02:
+                label = "surface_defect"
+                rule_strength = 0.62
+                evidence_rules.append("high_heat_moderate_area_surface_defect_fallback")
+            else:
+                label = self.unknown_label
+                rule_strength = float(self.rule_cfg.get("minimum_semantic_confidence", 0.35))
+                evidence_rules.append("no_rule_matched_confidently")
 
         label = self._safe_label(label)
         confidence = clamp(0.65 * rule_strength + 0.35 * box.max_heat)
