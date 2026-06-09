@@ -185,3 +185,14 @@ A localisation evaluation script was added to compare predicted anomaly masks ag
 | capsule | PaDiM | 0.1731 | 0.2673 | 0.1365 | 0.2403 |
 
 The localisation results show that PaDiM produced stronger mask alignment across the tested categories, while PatchCore remained stronger for image-level detection and operational review efficiency. This highlights an important trade-off between anomaly classification performance and pixel-level localisation quality.
+
+### Capsule localisation threshold sweep
+
+A localisation threshold sweep was added for the capsule category to test whether anomaly-map post-processing could improve IoU and Dice without retraining the detector.
+
+| Model | Original mean IoU | Tuned mean IoU | Original mean Dice | Tuned mean Dice | Best threshold |
+|---|---:|---:|---:|---:|---:|
+| PatchCore capsule | 0.1068 | 0.2979 | 0.1671 | 0.4311 | 0.85 |
+| PaDiM capsule | 0.1731 | 0.1830 | 0.2673 | 0.2751 | 0.55 |
+
+The result shows that PatchCore capsule localisation improved substantially after threshold tuning, while PaDiM improved only slightly. This suggests that PatchCore anomaly maps contained useful localisation information, but the original binary mask conversion was not optimal.
