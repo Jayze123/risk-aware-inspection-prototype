@@ -170,3 +170,18 @@ A semantic fallback rule was added for the capsule category to reduce unnecessar
 | PaDiM capsule | 0.9432 | 0.8712 | 0.8409 |
 
 This shows that the risk-aware pipeline can be improved at the semantic/governance layer without retraining the anomaly detector.
+
+### Localisation evaluation
+
+A localisation evaluation script was added to compare predicted anomaly masks against MVTec AD ground-truth masks using IoU and Dice coefficient.
+
+| Category | Model | Mean IoU | Mean Dice | Median IoU | Median Dice |
+|---|---|---:|---:|---:|---:|
+| bottle | PatchCore | 0.3472 | 0.4928 | 0.3480 | 0.5164 |
+| bottle | PaDiM | 0.4968 | 0.6442 | 0.4930 | 0.6604 |
+| hazelnut | PatchCore | 0.1456 | 0.2316 | 0.1070 | 0.1933 |
+| hazelnut | PaDiM | 0.3084 | 0.4444 | 0.3168 | 0.4811 |
+| capsule | PatchCore | 0.1068 | 0.1671 | 0.0450 | 0.0862 |
+| capsule | PaDiM | 0.1731 | 0.2673 | 0.1365 | 0.2403 |
+
+The localisation results show that PaDiM produced stronger mask alignment across the tested categories, while PatchCore remained stronger for image-level detection and operational review efficiency. This highlights an important trade-off between anomaly classification performance and pixel-level localisation quality.
