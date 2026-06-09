@@ -17,7 +17,7 @@ except ImportError:  # pragma: no cover
 
 DEFAULT_DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://risk_user:risk_password@localhost:5432/risk_inspection",
+    "postgresql://risk_user:risk_password@127.0.0.1:55432/risk_inspection",
 )
 
 

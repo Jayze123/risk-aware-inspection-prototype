@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: risk_user
       POSTGRES_PASSWORD: risk_password
     ports:
-      - "5432:5432"
+      - "55432:5432"
     volumes:
       - risk_postgres_data:/var/lib/postgresql/data
     healthcheck:
