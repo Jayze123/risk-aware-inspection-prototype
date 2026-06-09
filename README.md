@@ -159,3 +159,14 @@ A semantic fallback rule was added for the capsule category to reduce unnecessar
 | PaDiM capsule | 0.9432 | 0.8712 | 0.8409 |
 
 This shows that the risk-aware pipeline can be improved at the semantic/governance layer without retraining the anomaly detector.
+
+### Capsule semantic fallback update
+
+A semantic fallback rule was added for the capsule category to reduce unnecessary unknown labels. This did not change the detector-level classification metrics, but it reduced the review workload.
+
+| Detector | F1-score | Human review rate before | Human review rate after |
+|---|---:|---:|---:|
+| PatchCore capsule | 0.9815 | 0.6818 | 0.5152 |
+| PaDiM capsule | 0.9432 | 0.8712 | 0.8409 |
+
+This shows that the risk-aware pipeline can be improved at the semantic/governance layer without retraining the anomaly detector.
