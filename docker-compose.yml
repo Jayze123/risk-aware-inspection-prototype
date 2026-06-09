@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: risk_inspection_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: risk_inspection
+      POSTGRES_USER: risk_user
+      POSTGRES_PASSWORD: risk_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - risk_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U risk_user -d risk_inspection"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  risk_postgres_data:
