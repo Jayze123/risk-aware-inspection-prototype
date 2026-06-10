@@ -12,6 +12,7 @@ if str(PROJECT_SRC) not in sys.path:
     sys.path.insert(0, str(PROJECT_SRC))
 
 from risk_aware_inspection.audit_db import connect, fetch_record, save_operator_review  # noqa: E402
+from risk_aware_inspection.qa_release import recommend_qa_action
 
 
 def fetch_summary() -> list[dict[str, Any]]:
@@ -31,6 +32,26 @@ def fetch_summary() -> list[dict[str, Any]]:
             cursor.execute(query)
             return list(cursor.fetchall())
 
+def fetch_latest_operator_review(record_id: int) -> dict[str, Any] | None:
+    """Fetch the latest operator review for one inspection record."""
+    query = """
+        SELECT
+            id,
+            inspection_record_id,
+            operator_decision,
+            operator_note,
+            reviewed_by,
+            created_at
+        FROM operator_reviews
+        WHERE inspection_record_id = %(record_id)s
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1;
+    """
+
+    with connect() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(query, {"record_id": record_id})
+            return cursor.fetchone()
 
 def fetch_records(
     category: str | None = None,
@@ -70,6 +91,7 @@ def fetch_records(
             semantic_label,
             risk_class,
             fused_confidence,
+            is_anomalous,
             requires_review,
             created_at
         FROM inspection_records
@@ -89,6 +111,9 @@ def fetch_records(
 
         if row.get("fused_confidence") is not None:
             row["fused_confidence"] = round(float(row["fused_confidence"]), 4)
+
+        qa_decision = recommend_qa_action(row)
+        row["qa_action"] = qa_decision["qa_action"]
 
     return rows
 
@@ -155,6 +180,7 @@ with ui.column().classes("w-full p-4 gap-4"):
             {"name": "model_name", "label": "Model", "field": "model_name", "sortable": True},
             {"name": "semantic_label", "label": "Semantic label", "field": "semantic_label", "sortable": True},
             {"name": "risk_class", "label": "Risk class", "field": "risk_class", "sortable": True},
+            {"name": "qa_action", "label": "QA action", "field": "qa_action", "sortable": True},
             {"name": "fused_confidence", "label": "Confidence", "field": "fused_confidence", "sortable": True},
             {"name": "requires_review", "label": "Review?", "field": "requires_review", "sortable": True},
             {"name": "created_at", "label": "Created", "field": "created_at", "sortable": True},
@@ -168,8 +194,14 @@ with ui.column().classes("w-full p-4 gap-4"):
         with ui.row().classes("items-end gap-4"):
             record_id_input = ui.number(label="Inspection record ID", value=1, min=1)
             decision_select = ui.select(
-                ["accepted", "rejected", "escalated", "needs further inspection"],
-                value="accepted",
+                [
+                    "false_positive_release",
+                    "defect_confirmed",
+                    "needs_further_inspection",
+                    "rejected",
+                    "accepted",
+                ],
+                value="false_positive_release",
                 label="Operator decision",
             )
             reviewed_by_input = ui.input(label="Reviewed by", value="operator_demo")
@@ -241,17 +273,29 @@ def load_selected_record() -> None:
             selected_record_output.content = f"Record `{record_id}` was not found."
             return
 
+        latest_review = fetch_latest_operator_review(record_id)
+        qa_decision = recommend_qa_action(record, latest_review)
+
         selected_record_output.content = (
             f"### Selected inspection record\n\n"
-            f"- **ID:** {record.get('id')}\n"
-            f"- **Image ID:** {record.get('image_id')}\n"
-            f"- **Category:** {record.get('category')}\n"
-            f"- **Model:** {record.get('model_name')}\n"
-            f"- **Semantic label:** {record.get('semantic_label')}\n"
-            f"- **Risk class:** {record.get('risk_class')}\n"
-            f"- **Fused confidence:** {record.get('fused_confidence')}\n"
-            f"- **Requires review:** {record.get('requires_review')}\n"
-            f"- **Review reasons:** {record.get('review_reasons')}\n"
+            f"- **ID:** `{record.get('id')}`\n"
+            f"- **Image ID:** `{record.get('image_id')}`\n"
+            f"- **Category:** `{record.get('category')}`\n"
+            f"- **Model:** `{record.get('model_name')}`\n"
+            f"- **Semantic label:** `{record.get('semantic_label')}`\n"
+            f"- **Risk class:** `{record.get('risk_class')}`\n"
+            f"- **Fused confidence:** `{record.get('fused_confidence')}`\n"
+            f"- **Requires review:** `{record.get('requires_review')}`\n"
+            f"- **Review reasons:** `{record.get('review_reasons')}`\n\n"
+            f"### QA release decision\n\n"
+            f"- **QA action:** `{qa_decision.get('qa_action')}`\n"
+            f"- **QA status:** `{qa_decision.get('qa_status')}`\n"
+            f"- **Operator action required:** `{qa_decision.get('requires_operator_action')}`\n"
+            f"- **Reason:** {qa_decision.get('reason')}\n\n"
+            f"### Latest operator review\n\n"
+            f"- **Decision:** `{latest_review.get('operator_decision') if latest_review else 'No review saved yet'}`\n"
+            f"- **Reviewed by:** `{latest_review.get('reviewed_by') if latest_review else 'N/A'}`\n"
+            f"- **Note:** {latest_review.get('operator_note') if latest_review else 'N/A'}\n"
         )
 
     except Exception as exc:
@@ -278,6 +322,9 @@ def save_review() -> None:
             )
 
         ui.notify(f"Review saved with ID {review_id}.", type="positive")
+
+        load_selected_record()
+        refresh_records()
 
     except Exception as exc:
         ui.notify(f"Could not save review: {exc}", type="negative")
