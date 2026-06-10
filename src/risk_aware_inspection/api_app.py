@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+from risk_aware_inspection.qa_release import recommend_qa_action
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field
@@ -31,6 +33,27 @@ class OperatorReviewRequest(BaseModel):
 def _make_json_safe(value: Any) -> Any:
     """Convert database rows into JSON-safe objects."""
     return jsonable_encoder(value)
+
+def fetch_latest_operator_review(record_id: int) -> dict[str, Any] | None:
+    """Fetch the most recent operator review for one inspection record."""
+    query = """
+        SELECT
+            id,
+            inspection_record_id,
+            operator_decision,
+            operator_note,
+            reviewed_by,
+            created_at
+        FROM operator_reviews
+        WHERE inspection_record_id = %(record_id)s
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1;
+    """
+
+    with connect() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(query, {"record_id": record_id})
+            return cursor.fetchone()
 
 
 @app.get("/health")
@@ -105,14 +128,44 @@ def list_records(
 
 @app.get("/records/{record_id}")
 def get_record(record_id: int) -> dict[str, Any]:
-    """Return one inspection record by database ID."""
+    """Return one inspection record by database ID, including QA release guidance."""
     with connect() as connection:
         record = fetch_record(connection, record_id)
 
     if record is None:
         raise HTTPException(status_code=404, detail="Inspection record not found.")
 
-    return _make_json_safe(record)
+    latest_review = fetch_latest_operator_review(record_id)
+    qa_decision = recommend_qa_action(record, latest_review)
+
+    response = dict(record)
+    response["latest_operator_review"] = latest_review
+    response["qa_decision"] = qa_decision
+
+    return _make_json_safe(response)
+
+@app.get("/records/{record_id}/qa-decision")
+def get_qa_decision(record_id: int) -> dict[str, Any]:
+    """Return the computed QA release decision for one inspection record."""
+    with connect() as connection:
+        record = fetch_record(connection, record_id)
+
+    if record is None:
+        raise HTTPException(status_code=404, detail="Inspection record not found.")
+
+    latest_review = fetch_latest_operator_review(record_id)
+    qa_decision = recommend_qa_action(record, latest_review)
+
+    return {
+        "inspection_record_id": record_id,
+        "image_id": record.get("image_id"),
+        "category": record.get("category"),
+        "model_name": record.get("model_name"),
+        "risk_class": record.get("risk_class"),
+        "requires_review": record.get("requires_review"),
+        "latest_operator_review": _make_json_safe(latest_review),
+        "qa_decision": qa_decision,
+    }
 
 
 @app.post("/reviews")
