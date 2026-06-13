@@ -123,7 +123,7 @@ lookups cause Review Required rather than inferred risk values.
 
 ## Current experiment results
 
-The current prototype has been tested on two MVTec AD categories: ottle and hazelnut. The experiments compare the initial statistical detector, threshold-tuned statistical detection, PatchCore, and PaDiM after integration with the risk-aware inspection pipeline.
+The current prototype has been tested on two MVTec AD categories: bottle and hazelnut. The experiments compare the initial statistical detector, threshold-tuned statistical detection, PatchCore, and PaDiM after integration with the risk-aware inspection pipeline.
 
 ### Integrated bottle results
 
