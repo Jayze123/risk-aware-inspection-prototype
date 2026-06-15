@@ -14,7 +14,12 @@ def train_padim_folder(
     train_batch_size: int = 4,
     eval_batch_size: int = 4,
     num_workers: int = 0,
+    backbone: str = "resnet18",
+    n_features: int | None = None,
 ) -> None:
+    print(f"PaDiM backbone: {backbone}")
+    print(f"PaDiM n_features: {n_features}")
+
     test_root = category_root / "test"
 
     abnormal_dirs = [
@@ -38,8 +43,10 @@ def train_padim_folder(
     )
 
     model = Padim(
-        backbone="resnet18",
+        backbone=backbone,
         layers=["layer1", "layer2", "layer3"],
+        pre_trained=True,
+        n_features=n_features,
     )
 
     engine = Engine(
@@ -68,17 +75,16 @@ def main() -> None:
     )
 
     parser.add_argument(
-        "--category-root",
-        required=True,
-        type=Path,
-        help="Path to one MVTec category folder, e.g. mvtec_anomaly_detection/bottle.",
+    "--backbone",
+    default="resnet18",
+    help="CNN backbone used by PaDiM.",
     )
 
     parser.add_argument(
-        "--output",
-        required=True,
-        type=Path,
-        help="Output directory for Anomalib experiment results.",
+    "--n-features",
+    type=int,
+    default=None,
+    help="Number of features retained by PaDiM. Use default None unless testing dimensionality reduction.",
     )
 
     parser.add_argument("--train-batch-size", type=int, default=4)
@@ -93,6 +99,8 @@ def main() -> None:
         train_batch_size=args.train_batch_size,
         eval_batch_size=args.eval_batch_size,
         num_workers=args.num_workers,
+        backbone=args.backbone,
+        n_features=args.n_features,
     )
 
 

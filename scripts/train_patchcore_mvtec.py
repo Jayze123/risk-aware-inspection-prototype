@@ -8,6 +8,8 @@ from anomalib.engine import Engine
 from anomalib.models import Patchcore
 
 
+
+
 def train_patchcore(
     dataset_root: Path,
     category: str,
@@ -15,7 +17,13 @@ def train_patchcore(
     train_batch_size: int = 8,
     eval_batch_size: int = 8,
     num_workers: int = 0,
+    backbone: str = "wide_resnet50_2",
+    coreset_sampling_ratio: float = 0.1,
+    num_neighbors: int = 9,
 ) -> None:
+    print(f"PatchCore backbone: {backbone}")
+    print(f"PatchCore coreset sampling ratio: {coreset_sampling_ratio}")
+    print(f"PatchCore number of neighbours: {num_neighbors}")
     """
     Train and evaluate PatchCore on one MVTec AD category.
 
@@ -33,10 +41,11 @@ def train_patchcore(
     )
 
     model = Patchcore(
-        backbone="wide_resnet50_2",
-        layers=["layer2", "layer3"],
-        coreset_sampling_ratio=0.1,
-        num_neighbors=9,
+        backbone=backbone,
+        layers=("layer2", "layer3"),
+        pre_trained=True,
+        coreset_sampling_ratio=coreset_sampling_ratio,
+        num_neighbors=num_neighbors,
     )
 
     engine = Engine(
@@ -63,26 +72,26 @@ def main() -> None:
     )
 
     parser.add_argument(
-        "--dataset-root",
-        required=True,
-        type=Path,
-        help="Path to the extracted MVTec AD root folder.",
+        "--backbone",
+        default="wide_resnet50_2",
+        help="CNN backbone used by PatchCore.",
     )
 
     parser.add_argument(
-        "--category",
-        required=True,
-        type=str,
-        help="MVTec AD category, for example bottle or hazelnut.",
+        "--coreset-sampling-ratio",
+        type=float,
+        default=0.1,
+        help="PatchCore memory-bank coreset sampling ratio.",
     )
 
     parser.add_argument(
-        "--output",
-        required=True,
-        type=Path,
-        help="Directory where anomalib experiment outputs will be saved.",
+        "--num-neighbors",
+        type=int,
+        default=9,
+        help="Number of nearest neighbours used by PatchCore.",
     )
 
+    
     parser.add_argument("--train-batch-size", type=int, default=8)
     parser.add_argument("--eval-batch-size", type=int, default=8)
     parser.add_argument("--num-workers", type=int, default=0)
@@ -96,6 +105,9 @@ def main() -> None:
         train_batch_size=args.train_batch_size,
         eval_batch_size=args.eval_batch_size,
         num_workers=args.num_workers,
+        backbone=args.backbone,
+        coreset_sampling_ratio=args.coreset_sampling_ratio,
+        num_neighbors=args.num_neighbors,
     )
 
 

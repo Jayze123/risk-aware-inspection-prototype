@@ -11,9 +11,12 @@ from anomalib.models import Patchcore
 def train_patchcore_folder(
     category_root: Path,
     output_dir: Path,
-    train_batch_size: int = 4,
-    eval_batch_size: int = 4,
+    train_batch_size: int = 8,
+    eval_batch_size: int = 8,
     num_workers: int = 0,
+    backbone: str = "wide_resnet50_2",
+    coreset_sampling_ratio: float = 0.1,
+    num_neighbors: int = 9,
 ) -> None:
     test_root = category_root / "test"
 
@@ -38,10 +41,11 @@ def train_patchcore_folder(
     )
 
     model = Patchcore(
-        backbone="wide_resnet50_2",
-        layers=["layer2", "layer3"],
-        coreset_sampling_ratio=0.1,
-        num_neighbors=9,
+        backbone=backbone,
+        layers=("layer2", "layer3"),
+        pre_trained=True,
+        coreset_sampling_ratio=coreset_sampling_ratio,
+        num_neighbors=num_neighbors,
     )
 
     engine = Engine(
@@ -70,19 +74,24 @@ def main() -> None:
     )
 
     parser.add_argument(
-        "--category-root",
-        required=True,
-        type=Path,
-        help="Path to one MVTec category folder, e.g. mvtec_anomaly_detection/bottle.",
+    "--backbone",
+    default="wide_resnet50_2",
+    help="CNN backbone used by PatchCore.",
     )
 
     parser.add_argument(
-        "--output",
-        required=True,
-        type=Path,
-        help="Output directory for anomalib experiment results.",
+        "--coreset-sampling-ratio",
+        type=float,
+        default=0.1,
+        help="PatchCore memory-bank coreset sampling ratio.",
     )
 
+    parser.add_argument(
+        "--num-neighbors",
+        type=int,
+        default=9,
+        help="Number of nearest neighbours used by PatchCore.",
+    )
     parser.add_argument("--train-batch-size", type=int, default=4)
     parser.add_argument("--eval-batch-size", type=int, default=4)
     parser.add_argument("--num-workers", type=int, default=0)
@@ -95,6 +104,9 @@ def main() -> None:
         train_batch_size=args.train_batch_size,
         eval_batch_size=args.eval_batch_size,
         num_workers=args.num_workers,
+        backbone=args.backbone,
+        coreset_sampling_ratio=args.coreset_sampling_ratio,
+        num_neighbors=args.num_neighbors,
     )
 
 
