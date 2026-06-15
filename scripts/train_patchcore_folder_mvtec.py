@@ -74,9 +74,27 @@ def main() -> None:
     )
 
     parser.add_argument(
-    "--backbone",
-    default="wide_resnet50_2",
-    help="CNN backbone used by PatchCore.",
+        "--category-root",
+        required=True,
+        type=Path,
+        help="Path to one MVTec category folder, e.g. mvtec_anomaly_detection/bottle.",
+    )
+
+    parser.add_argument(
+        "--output",
+        required=True,
+        type=Path,
+        help="Output directory for anomalib experiment results.",
+    )
+
+    parser.add_argument("--train-batch-size", type=int, default=8)
+    parser.add_argument("--eval-batch-size", type=int, default=8)
+    parser.add_argument("--num-workers", type=int, default=0)
+
+    parser.add_argument(
+        "--backbone",
+        default="wide_resnet50_2",
+        help="CNN backbone used by PatchCore.",
     )
 
     parser.add_argument(
@@ -92,9 +110,6 @@ def main() -> None:
         default=9,
         help="Number of nearest neighbours used by PatchCore.",
     )
-    parser.add_argument("--train-batch-size", type=int, default=4)
-    parser.add_argument("--eval-batch-size", type=int, default=4)
-    parser.add_argument("--num-workers", type=int, default=0)
 
     args = parser.parse_args()
 
