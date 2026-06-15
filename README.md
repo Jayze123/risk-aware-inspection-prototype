@@ -1,61 +1,103 @@
 # Risk-Aware Vision Pipeline Prototype
 
-This repository is a VS Code-compatible research prototype for the MSc dissertation proposal titled
-**Risk-Aware Vision Pipeline for Industrial Visual Inspection and Anomaly Detection**.
+This repository contains a VS Code-compatible research prototype for the MSc dissertation project titled **Risk-Aware Vision Pipeline for Industrial Visual Inspection and Anomaly Detection**.
 
-The project implements the proposal's minimum viable inspection workflow:
+The project implements a risk-aware industrial inspection workflow that combines anomaly detection, localisation, semantic interpretation, risk classification, human-review gating, audit logging and operator-facing decision support. The purpose of the prototype is to evaluate how anomaly detection outputs can be extended into a more operationally useful inspection framework, rather than treating defect detection as a standalone classification task.
+
+The implemented workflow includes:
 
 1. image ingestion and preprocessing;
-2. anomaly detection through a swappable detector interface;
-3. localisation through heatmap thresholding, morphology and connected components;
-4. constrained semantic interpretation using a fixed defect taxonomy;
-5. deterministic Risk Priority Matrix lookup;
-6. confidence fusion using minimum and weighted-average strategies;
-7. human-review gating;
-8. JSONL, CSV and visual artefact output for auditability.
+2. anomaly detection through a modular detector interface;
+3. anomaly detection using statistical reference modelling, PatchCore and PaDiM;
+4. localisation through anomaly-map thresholding, morphology and connected components;
+5. constrained semantic interpretation using a fixed defect taxonomy;
+6. deterministic Risk Priority Matrix lookup;
+7. confidence fusion using minimum and weighted-average strategies;
+8. human-review gating for uncertain, high-risk or semantically ambiguous cases;
+9. quality disposition decisions such as pass, hold, reinspect, quarantine and release after review;
+10. PostgreSQL audit logging for inspection records and operator reviews;
+11. FastAPI backend endpoints for inspection records, summaries, reviews and QA decisions;
+12. NiceGUI operator dashboard for inspection review and decision support;
+13. JSONL, CSV, database and visual artefact output for traceability.
 
-The runnable detector is a simple normal-reference statistical detector. It is included so that the
-whole pipeline can be executed immediately in VS Code without GPU access. It is not intended to replace
-PaDiM or PatchCore. The detector interface and `AnomalibDetectorAdapter` stub show where PaDiM and
-PatchCore outputs should later be connected.
+The project initially used a simple normal-reference statistical detector so that the full pipeline could be executed immediately in VS Code without GPU access. The pipeline has since been extended with PaDiM and PatchCore experiments, allowing the statistical baseline to be compared with established industrial anomaly detection architectures.
 
 ## Project structure
 
 ```text
 risk_aware_inspection_prototype/
-├── config/pipeline.yaml
-├── src/risk_aware_inspection/
-│   ├── cli.py
-│   ├── pipeline.py
-│   ├── ingestion.py
-│   ├── localisation.py
-│   ├── semantics.py
-│   ├── risk.py
-│   ├── confidence.py
-│   ├── gating.py
-│   ├── outputs.py
-│   └── detectors/
-│       ├── base.py
-│       ├── simple_statistical.py
-│       └── anomalib_adapter.py
+├── config/
+│   └── pipeline.yaml
+├── database/
+│   └── schema.sql
+├── docs/
+│   ├── experiments/
+│   ├── figures/
+│   └── writing/
+├── scripts/
+│   ├── train_patchcore_mvtec.py
+│   ├── train_patchcore_folder_mvtec.py
+│   ├── train_padim_folder_mvtec.py
+│   ├── evaluate_localisation_mvtec.py
+│   ├── tune_localisation_thresholds.py
+│   └── load_results_to_audit_db.py
+├── src/
+│   └── risk_aware_inspection/
+│       ├── api_app.py
+│       ├── audit_db.py
+│       ├── cli.py
+│       ├── confidence.py
+│       ├── config.py
+│       ├── dashboard_app.py
+│       ├── gating.py
+│       ├── ingestion.py
+│       ├── localisation.py
+│       ├── outputs.py
+│       ├── pipeline.py
+│       ├── qa_release.py
+│       ├── risk.py
+│       ├── semantics.py
+│       └── detectors/
+│           ├── base.py
+│           ├── simple_statistical.py
+│           └── anomalib_adapter.py
 ├── tests/
+├── docker-compose.yml
 ├── requirements.txt
-└── pyproject.toml
+├── requirements-anomalib.txt
+├── pyproject.toml
+└── README.md
 ```
 
 ## Setup in VS Code
 
-Open the project folder in VS Code and run the following in the terminal:
+Open the project folder in VS Code and create a Python virtual environment:
 
 ```bash
 python -m venv .venv
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
-# macOS/Linux
-# source .venv/bin/activate
+```
 
+Activate the environment.
+
+For Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+For macOS/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Install the project:
+
+```bash
 pip install -e .
 ```
+
+For Anomalib-based experiments, use the dedicated Anomalib environment and the relevant requirements file used for PatchCore and PaDiM runs.
 
 ## Quick demo
 
@@ -96,103 +138,169 @@ outputs/run_demo/artefacts/*_annotated.png
 
 ## Using real images
 
-Place normal training/reference images in a folder, calibrate the detector on those images, then run
-inspection on your test images. For MVTec AD-style work, use the official `train/good` folder as the
-normal reference folder and run inference on `test/*` images.
+For real-image experiments, normal training or reference images should be placed in a dedicated folder and used to calibrate or train the selected detector. Test images are then processed through the same inspection pipeline.
 
-## Replacing the MVP detector with PaDiM or PatchCore
+For MVTec AD-style experiments, the official `train/good` folder is used as the normal reference set, while the `test/*` folders are used for evaluation.
 
-The downstream pipeline expects any detector to return:
+## Detector interface and Anomalib integration
 
-- image-level anomaly score;
-- calibrated anomaly threshold;
-- binary anomaly decision;
-- anomaly confidence;
-- pixel-level heatmap in `[0, 1]`.
+The downstream pipeline expects each detector to provide a consistent output contract:
 
-When an anomalib PaDiM or PatchCore experiment has been trained and exported, implement the
-`AnomalibDetectorAdapter.predict()` method so it converts anomalib outputs into this same contract.
-No change should be required in localisation, semantic interpretation, RPM, gating or output logging.
+* image-level anomaly score;
+* calibrated anomaly threshold;
+* binary anomaly decision;
+* anomaly confidence;
+* pixel-level heatmap in `[0, 1]`.
+
+The project integrates Anomalib-based PatchCore and PaDiM experiments into the same downstream risk-aware pipeline. This means that anomaly detection, localisation, semantic interpretation, risk classification, human-review gating and audit logging can be applied consistently across detector types.
+
+This modular structure allows detector architectures to be changed without rewriting the localisation, semantic interpretation, Risk Priority Matrix, confidence fusion, gating or output logging stages.
+
+## Model architecture parameterisation for comparison experiments
+
+The anomaly detection training scripts have been updated to support controlled architecture comparison. This allows the project to evaluate how different feature-extraction backbones and detector hyperparameters affect detection performance, localisation quality and downstream review workload.
+
+The implemented PatchCore detector uses a pre-trained `wide_resnet50_2` convolutional backbone with `layer2` and `layer3` feature extraction. PatchCore applies memory-bank modelling, coreset sampling and nearest-neighbour anomaly scoring to produce image-level anomaly decisions and anomaly maps. The PatchCore scripts support configurable architecture and hyperparameter settings through the following command-line arguments:
+
+* `--backbone`
+* `--coreset-sampling-ratio`
+* `--num-neighbors`
+
+The implemented PaDiM detector uses a pre-trained `resnet18` convolutional backbone with multi-layer patch feature extraction and statistical modelling of normal patch embeddings. The PaDiM script supports configurable architecture settings through:
+
+* `--backbone`
+* `--n-features`
+
+This allows the project to compare feature-extraction backbones such as `resnet18`, `resnet50` and `wide_resnet50_2` while keeping the downstream inspection pipeline consistent. The comparison is intended to support the dissertation results and discussion chapter by showing how architecture choice affects image-level detection performance, localisation behaviour, review workload and operational suitability.
+
+The preferred architecture will be selected based on the overall balance between detection performance, localisation quality, review efficiency and suitability for the proposed industrial inspection workflow, rather than on a single metric alone.
+
+## Operational application layer
+
+The project includes an operational application layer for inspection review, traceability and decision support.
+
+PostgreSQL is used as the audit database for inspection records and operator review decisions. Docker Compose is used to run the PostgreSQL service in a reproducible local environment. FastAPI exposes health checks, inspection records, summaries, review submission and QA decision endpoints. NiceGUI provides an operator-facing dashboard for viewing inspection records, filtering cases, loading selected records and saving review decisions.
+
+This operational layer extends the prototype beyond anomaly detection alone. It demonstrates how model outputs can be connected to traceable quality-control decision support in a way that is closer to an industrial inspection workflow.
+
+## Risk-governed quality disposition layer
+
+A risk-governed quality disposition layer has been added to convert inspection evidence into practical quality-control actions.
+
+The layer considers anomaly status, risk class, confidence, semantic ambiguity and the latest operator review decision. It can return outcomes such as:
+
+* `PASS`
+* `PASS_WITH_MONITORING`
+* `REINSPECT`
+* `HOLD`
+* `QUARANTINE`
+* `REVIEW_REQUIRED`
+* `RELEASE_AFTER_REVIEW`
+* `REJECT_AFTER_REVIEW`
+* `ENGINEERING_REVIEW`
+
+This supports scenarios where a product is initially flagged as anomalous but is later released after an operator confirms that the result was a false positive. The decision is stored through the audit workflow, preserving traceability between the model output, the operator review and the final quality disposition.
 
 ## Research notes
 
-The current prototype is designed for dissertation progress rather than production deployment. The
-most important research-facing features are modularity, traceable outputs and deterministic risk
-mapping. The semantic component is deliberately constrained to a fixed taxonomy, and missing RPM
-lookups cause Review Required rather than inferred risk values.
+The current prototype is designed for dissertation research rather than direct production deployment. The main research-facing features are modularity, traceable outputs, deterministic risk mapping, operator review and auditable decision support.
+
+The semantic component is deliberately constrained to a fixed taxonomy. Missing or uncertain semantic mappings cause Review Required rather than unsupported automatic risk decisions. This design choice reduces uncontrolled interpretation and keeps the system suitable for risk-aware inspection workflows.
+
+The current implementation does not physically control a conveyor, reject gate or robotic sorting mechanism. Instead, it demonstrates the decision logic and audit structure that could later be connected to production-line control systems after further validation.
 
 ## Current experiment results
 
-The current prototype has been tested on two MVTec AD categories: bottle and hazelnut. The experiments compare the initial statistical detector, threshold-tuned statistical detection, PatchCore, and PaDiM after integration with the risk-aware inspection pipeline.
+The current prototype has been tested on three MVTec AD categories: bottle, hazelnut and capsule. The experiments compare the initial statistical detector, threshold-tuned statistical detection, PatchCore and PaDiM after integration with the risk-aware inspection pipeline.
 
 ### Integrated bottle results
 
-| Detector | Accuracy | Precision | Recall | F1-score | Human review rate |
-|---|---:|---:|---:|---:|---:|
-| Statistical original | 0.5904 | 1.0000 | 0.4603 | 0.6304 | 0.5181 |
-| Statistical tuned 0.7 | 0.8795 | 0.8955 | 0.9524 | 0.9231 | 0.7711 |
-| PatchCore integrated | 0.9880 | 1.0000 | 0.9841 | 0.9920 | 0.1928 |
-| PaDiM integrated | 0.9518 | 0.9538 | 0.9841 | 0.9688 | 0.6867 |
+| Detector              | Accuracy | Precision | Recall | F1-score | Human review rate |
+| --------------------- | -------: | --------: | -----: | -------: | ----------------: |
+| Statistical original  |   0.5904 |    1.0000 | 0.4603 |   0.6304 |            0.5181 |
+| Statistical tuned 0.7 |   0.8795 |    0.8955 | 0.9524 |   0.9231 |            0.7711 |
+| PatchCore integrated  |   0.9880 |    1.0000 | 0.9841 |   0.9920 |            0.1928 |
+| PaDiM integrated      |   0.9518 |    0.9538 | 0.9841 |   0.9688 |            0.6867 |
 
 ### Integrated hazelnut results
 
-| Detector | Accuracy | Precision | Recall | F1-score | Human review rate |
-|---|---:|---:|---:|---:|---:|
-| Statistical original | 0.4364 | 0.8333 | 0.1429 | 0.2439 | 0.2273 |
-| Statistical tuned 0.7 | 0.5545 | 0.6567 | 0.6286 | 0.6423 | 0.7636 |
-| PatchCore integrated | 0.9909 | 1.0000 | 0.9857 | 0.9928 | 0.1727 |
-| PaDiM integrated | 0.7182 | 0.6970 | 0.9857 | 0.8166 | 0.9000 |
+| Detector              | Accuracy | Precision | Recall | F1-score | Human review rate |
+| --------------------- | -------: | --------: | -----: | -------: | ----------------: |
+| Statistical original  |   0.4364 |    0.8333 | 0.1429 |   0.2439 |            0.2273 |
+| Statistical tuned 0.7 |   0.5545 |    0.6567 | 0.6286 |   0.6423 |            0.7636 |
+| PatchCore integrated  |   0.9909 |    1.0000 | 0.9857 |   0.9928 |            0.1727 |
+| PaDiM integrated      |   0.7182 |    0.6970 | 0.9857 |   0.8166 |            0.9000 |
 
 ### Current interpretation
 
-PatchCore currently gives the strongest overall performance across both tested categories. It achieves high recall, no false positives, and a low human-review rate. PaDiM performs strongly on ottle, but it produces many false positives on hazelnut, which increases the human-review workload. These findings support the dissertation argument that anomaly detector choice affects not only classification performance, but also downstream risk-aware decision support and review efficiency.
+PatchCore currently gives the strongest overall image-level performance across the tested bottle and hazelnut categories. It achieves high recall, no false positives in the reported runs, and a comparatively low human-review rate. PaDiM performs strongly on bottle, but it produces more false positives on hazelnut, which increases the human-review workload.
 
-Detailed experiment notes are stored in docs/experiments/.
+These findings indicate that detector choice affects not only classification performance, but also downstream risk-aware decision support and review efficiency.
 
-### Capsule semantic fallback update
-
-A semantic fallback rule was added for the capsule category to reduce unnecessary unknown labels. This did not change the detector-level classification metrics, but it reduced the review workload.
-
-| Detector | F1-score | Human review rate before | Human review rate after |
-|---|---:|---:|---:|
-| PatchCore capsule | 0.9815 | 0.6818 | 0.5152 |
-| PaDiM capsule | 0.9432 | 0.8712 | 0.8409 |
-
-This shows that the risk-aware pipeline can be improved at the semantic/governance layer without retraining the anomaly detector.
+Detailed experiment notes are stored in `docs/experiments/`.
 
 ### Capsule semantic fallback update
 
 A semantic fallback rule was added for the capsule category to reduce unnecessary unknown labels. This did not change the detector-level classification metrics, but it reduced the review workload.
 
-| Detector | F1-score | Human review rate before | Human review rate after |
-|---|---:|---:|---:|
-| PatchCore capsule | 0.9815 | 0.6818 | 0.5152 |
-| PaDiM capsule | 0.9432 | 0.8712 | 0.8409 |
+| Detector          | F1-score | Human review rate before | Human review rate after |
+| ----------------- | -------: | -----------------------: | ----------------------: |
+| PatchCore capsule |   0.9815 |                   0.6818 |                  0.5152 |
+| PaDiM capsule     |   0.9432 |                   0.8712 |                  0.8409 |
 
-This shows that the risk-aware pipeline can be improved at the semantic/governance layer without retraining the anomaly detector.
+This shows that the risk-aware pipeline can be improved at the semantic and governance layer without retraining the anomaly detector.
 
 ### Localisation evaluation
 
 A localisation evaluation script was added to compare predicted anomaly masks against MVTec AD ground-truth masks using IoU and Dice coefficient.
 
-| Category | Model | Mean IoU | Mean Dice | Median IoU | Median Dice |
-|---|---|---:|---:|---:|---:|
-| bottle | PatchCore | 0.3472 | 0.4928 | 0.3480 | 0.5164 |
-| bottle | PaDiM | 0.4968 | 0.6442 | 0.4930 | 0.6604 |
-| hazelnut | PatchCore | 0.1456 | 0.2316 | 0.1070 | 0.1933 |
-| hazelnut | PaDiM | 0.3084 | 0.4444 | 0.3168 | 0.4811 |
-| capsule | PatchCore | 0.1068 | 0.1671 | 0.0450 | 0.0862 |
-| capsule | PaDiM | 0.1731 | 0.2673 | 0.1365 | 0.2403 |
+| Category | Model     | Mean IoU | Mean Dice | Median IoU | Median Dice |
+| -------- | --------- | -------: | --------: | ---------: | ----------: |
+| bottle   | PatchCore |   0.3472 |    0.4928 |     0.3480 |      0.5164 |
+| bottle   | PaDiM     |   0.4968 |    0.6442 |     0.4930 |      0.6604 |
+| hazelnut | PatchCore |   0.1456 |    0.2316 |     0.1070 |      0.1933 |
+| hazelnut | PaDiM     |   0.3084 |    0.4444 |     0.3168 |      0.4811 |
+| capsule  | PatchCore |   0.1068 |    0.1671 |     0.0450 |      0.0862 |
+| capsule  | PaDiM     |   0.1731 |    0.2673 |     0.1365 |      0.2403 |
 
-The localisation results show that PaDiM produced stronger mask alignment across the tested categories, while PatchCore remained stronger for image-level detection and operational review efficiency. This highlights an important trade-off between anomaly classification performance and pixel-level localisation quality.
+The localisation results show that PaDiM produced stronger default mask alignment across the tested categories, while PatchCore remained stronger for image-level detection and operational review efficiency. This highlights a trade-off between anomaly classification performance and pixel-level localisation quality.
 
 ### Capsule localisation threshold sweep
 
 A localisation threshold sweep was added for the capsule category to test whether anomaly-map post-processing could improve IoU and Dice without retraining the detector.
 
-| Model | Original mean IoU | Tuned mean IoU | Original mean Dice | Tuned mean Dice | Best threshold |
-|---|---:|---:|---:|---:|---:|
-| PatchCore capsule | 0.1068 | 0.2979 | 0.1671 | 0.4311 | 0.85 |
-| PaDiM capsule | 0.1731 | 0.1830 | 0.2673 | 0.2751 | 0.55 |
+| Model             | Original mean IoU | Tuned mean IoU | Original mean Dice | Tuned mean Dice | Best threshold |
+| ----------------- | ----------------: | -------------: | -----------------: | --------------: | -------------: |
+| PatchCore capsule |            0.1068 |         0.2979 |             0.1671 |          0.4311 |           0.85 |
+| PaDiM capsule     |            0.1731 |         0.1830 |             0.2673 |          0.2751 |           0.55 |
 
 The result shows that PatchCore capsule localisation improved substantially after threshold tuning, while PaDiM improved only slightly. This suggests that PatchCore anomaly maps contained useful localisation information, but the original binary mask conversion was not optimal.
+
+### Bottle and hazelnut localisation threshold sweep
+
+Threshold sweeps were also completed for bottle and hazelnut to compare how different detector outputs respond to localisation post-processing.
+
+| Category | Model     | Best threshold | Mean IoU | Mean Dice | Median IoU | Median Dice |
+| -------- | --------- | -------------: | -------: | --------: | ---------: | ----------: |
+| bottle   | PatchCore |           0.70 |   0.5929 |    0.7322 |     0.5916 |      0.7434 |
+| bottle   | PaDiM     |           0.35 |   0.5110 |    0.6612 |     0.4990 |      0.6658 |
+| hazelnut | PatchCore |           0.80 |   0.4331 |    0.5854 |     0.4232 |      0.5947 |
+| hazelnut | PaDiM     |           0.50 |   0.3340 |    0.4693 |     0.3225 |      0.4877 |
+
+After threshold tuning, PatchCore achieved stronger localisation performance on both bottle and hazelnut. This supports the interpretation that PatchCore can provide useful localisation evidence when the anomaly-map threshold is selected appropriately.
+
+## API and dashboard demonstration
+
+The FastAPI backend exposes routes for health checking, record listing, record lookup, review creation, summary reporting and QA decision support. The NiceGUI dashboard connects to the same audit database and provides an operator-facing interface.
+
+The dashboard supports:
+
+* database summary by category and detector;
+* inspection-record filtering;
+* selected-record loading;
+* QA release decision display;
+* latest operator review display;
+* operator decision submission;
+* review-based release after false-positive confirmation.
+
+This provides a practical demonstration of the proposed human-in-the-loop inspection workflow.
