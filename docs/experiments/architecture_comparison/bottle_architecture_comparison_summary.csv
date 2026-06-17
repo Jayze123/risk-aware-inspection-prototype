@@ -1,0 +1,6 @@
+category,model,backbone,n_features,image_auroc,image_f1score
+bottle,PatchCore,resnet18,,1.0,0.991999837875366
+bottle,PatchCore,resnet50,,1.0,0.991999837875366
+bottle,PatchCore,wide_resnet50_2,,1.0,0.991999837875366
+bottle,PaDiM,resnet18,default,0.9976189732551575,0.9838709831237793
+bottle,PaDiM,resnet50,100,0.99523814928894,0.9841269850730896
