@@ -1,0 +1,6 @@
+category,model,backbone,n_features,image_auroc,image_f1score
+hazelnut,PatchCore,resnet18,,0.9985713362693787,0.978723406791687
+hazelnut,PatchCore,resnet50,,1.0,0.9928057789802551
+hazelnut,PatchCore,wide_resnet50_2,,1.0,0.9928057789802551
+hazelnut,PaDiM,resnet18,default,0.795371081161499,0.832981595993042
+hazelnut,PaDiM,resnet50,100,0.7760713696479797,0.7831325531005859
