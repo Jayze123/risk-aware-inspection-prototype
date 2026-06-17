@@ -183,6 +183,14 @@ PostgreSQL is used as the audit database for inspection records and operator rev
 
 This operational layer extends the prototype beyond anomaly detection alone. It demonstrates how model outputs can be connected to traceable quality-control decision support in a way that is closer to an industrial inspection workflow.
 
+### Evidence-linked operator review panel
+
+The NiceGUI operator dashboard includes an evidence-linked review panel. When an inspection record is loaded, the dashboard searches the local `outputs/` directory for visual artefacts linked to the selected `image_id`. The panel displays available annotated inspection images, heatmap overlays, predicted masks and anomaly-map evidence.
+
+This links the database inspection record to the visual evidence used during operator review. It supports traceable quality-control decision making because an operator can review the anomaly evidence before saving a decision such as accept, reject, reinspect or false-positive release.
+
+The feature strengthens the operational layer of the prototype by connecting anomaly detection outputs, localisation artefacts, PostgreSQL audit records, operator review decisions and risk-governed quality disposition.
+
 ## Risk-governed quality disposition layer
 
 A risk-governed quality disposition layer has been added to convert inspection evidence into practical quality-control actions.
