@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from nicegui import ui
+from nicegui import app, ui
 
 PROJECT_SRC = Path(__file__).resolve().parents[1]
 
@@ -13,6 +13,11 @@ if str(PROJECT_SRC) not in sys.path:
 
 from risk_aware_inspection.audit_db import connect, fetch_record, save_operator_review  # noqa: E402
 from risk_aware_inspection.qa_release import recommend_qa_action
+
+OUTPUTS_DIR = Path("outputs").resolve()
+
+if OUTPUTS_DIR.exists():
+    app.add_static_files("/evidence", OUTPUTS_DIR)
 
 
 def fetch_summary() -> list[dict[str, Any]]:
@@ -210,6 +215,8 @@ with ui.column().classes("w-full p-4 gap-4"):
 
         selected_record_output = ui.markdown("No record selected yet.")
 
+        evidence_panel = ui.column().classes("w-full")
+
         with ui.row().classes("gap-4"):
             load_record_button = ui.button("Load selected record")
             save_review_button = ui.button("Save review decision", color="primary")
@@ -262,6 +269,103 @@ def refresh_records() -> None:
         ui.notify(f"Could not load records: {exc}", type="negative")
 
 
+def find_evidence_images(record: dict, max_images: int = 6) -> list[dict]:
+    """Find unique visual evidence artefacts linked to an inspection record.
+
+    Evidence is matched primarily by image_id. When duplicate-looking files are
+    found in different output folders, the function keeps only one version of
+    each filename and prioritises artefacts that match the selected model.
+    """
+    if not OUTPUTS_DIR.exists():
+        return []
+
+    image_id = str(record.get("image_id", "")).strip()
+    model_name = str(record.get("model_name", "")).strip().lower()
+
+    if not image_id:
+        return []
+
+    search_terms = [
+        image_id,
+        image_id.replace("__", "_"),
+        image_id.replace("_", "__"),
+    ]
+
+    matches: list[Path] = []
+
+    for term in search_terms:
+        matches.extend(OUTPUTS_DIR.rglob(f"*{term}*.png"))
+
+    if not matches:
+        return []
+
+    def evidence_type(path: Path) -> str:
+        name = path.name.lower()
+
+        if "annotated" in name:
+            return "Annotated inspection evidence"
+        if "heatmap" in name or "overlay" in name:
+            return "Heatmap evidence"
+        if "mask" in name:
+            return "Predicted mask evidence"
+
+        return "Supporting visual evidence"
+
+    def evidence_priority(path: Path) -> tuple[int, int, float, str]:
+        path_text = str(path).lower()
+        name = path.name.lower()
+
+        model_priority = 0 if model_name and model_name in path_text else 1
+
+        if "annotated" in name:
+            type_priority = 0
+        elif "heatmap" in name or "overlay" in name:
+            type_priority = 1
+        elif "mask" in name:
+            type_priority = 2
+        else:
+            type_priority = 3
+
+        try:
+            modified_time = -path.stat().st_mtime
+        except OSError:
+            modified_time = 0
+
+        return (model_priority, type_priority, modified_time, name)
+
+    sorted_matches = sorted(set(matches), key=evidence_priority)
+
+    unique_matches: list[Path] = []
+    seen_names: set[str] = set()
+
+    for path in sorted_matches:
+        name_key = path.name.lower()
+
+        if name_key in seen_names:
+            continue
+
+        seen_names.add(name_key)
+        unique_matches.append(path)
+
+        if len(unique_matches) >= max_images:
+            break
+
+    evidence_items = []
+
+    for path in unique_matches:
+        relative_path = path.resolve().relative_to(OUTPUTS_DIR)
+        evidence_items.append(
+            {
+                "label": evidence_type(path),
+                "filename": path.name,
+                "source": f"/evidence/{relative_path.as_posix()}",
+                "path": str(path),
+            }
+        )
+
+    return evidence_items
+
+
 def load_selected_record() -> None:
     try:
         record_id = int(record_id_input.value)
@@ -275,6 +379,30 @@ def load_selected_record() -> None:
 
         latest_review = fetch_latest_operator_review(record_id)
         qa_decision = recommend_qa_action(record, latest_review)
+
+        evidence_panel.clear()
+
+        with evidence_panel:
+            ui.separator()
+            ui.label("Visual evidence linked to selected record").classes("text-h5")
+
+            evidence_items = find_evidence_images(record)
+
+        if not evidence_items:
+            ui.label(
+                "No matching visual evidence artefacts were found for this record."
+            ).classes("text-grey")
+        else:
+            ui.label(
+                "The images below provide visual support for the operator review decision."
+            ).classes("text-body2")
+
+            with ui.grid(columns=3).classes("w-full gap-4"):
+                for item in evidence_items:
+                    with ui.card().classes("w-full"):
+                        ui.label(item["label"]).classes("text-subtitle2")
+                        ui.label(item["filename"]).classes("text-caption text-grey")
+                        ui.image(item["source"]).classes("w-full")
 
         selected_record_output.content = (
             f"### Selected inspection record\n\n"
