@@ -87,6 +87,20 @@ def main() -> None:
     help="Number of features retained by PaDiM. Use default None unless testing dimensionality reduction.",
     )
 
+    parser.add_argument(
+        "--category-root",
+        required=True,
+        type=Path,
+        help="Path to one MVTec category folder, e.g. mvtec_anomaly_detection/bottle.",
+    )
+
+    parser.add_argument(
+        "--output",
+        required=True,
+        type=Path,
+        help="Output directory for anomalib experiment results.",
+    )
+
     parser.add_argument("--train-batch-size", type=int, default=4)
     parser.add_argument("--eval-batch-size", type=int, default=4)
     parser.add_argument("--num-workers", type=int, default=0)
