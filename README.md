@@ -213,19 +213,13 @@ The current implementation does not physically control a conveyor, reject gate o
 
 The current prototype has been tested on three MVTec AD categories: bottle, hazelnut and capsule. The experiments compare the initial statistical detector, threshold-tuned statistical detection, PatchCore and PaDiM after integration with the risk-aware inspection pipeline.
 
-### Capsule architecture comparison
+### Architecture comparison across evaluated categories
 
-A controlled architecture comparison was carried out on the capsule category to evaluate how different PatchCore and PaDiM backbone configurations affected image-level anomaly detection performance. The comparison included PatchCore with `resnet18`, `resnet50` and `wide_resnet50_2`, and PaDiM with `resnet18` and `resnet50`. For the PaDiM `resnet50` run, `n_features` was set to 100 because the installed Anomalib implementation requires the retained feature dimension to be specified for this backbone.
+A controlled architecture comparison was carried out across the bottle, capsule and hazelnut categories to evaluate how different PatchCore and PaDiM configurations affected image-level anomaly detection performance. PatchCore was evaluated using `resnet18`, `resnet50` and `wide_resnet50_2` backbones, while PaDiM was evaluated using `resnet18` and `resnet50`. For the PaDiM `resnet50` runs, `n_features` was set to 100 because the installed Anomalib implementation requires an explicit retained feature dimension for that backbone.
 
-| Model     | Backbone          | n_features | Image AUROC | Image F1-score |
-| --------- | ----------------- | ---------: | ----------: | -------------: |
-| PatchCore | `resnet18`        |          — |      0.9817 |         0.9767 |
-| PatchCore | `resnet50`        |          — |      0.9936 |         0.9818 |
-| PatchCore | `wide_resnet50_2` |          — |      0.9932 |         0.9770 |
-| PaDiM     | `resnet18`        |    default |      0.8975 |         0.9463 |
-| PaDiM     | `resnet50`        |        100 |      0.9110 |         0.9469 |
+The comparison showed that PatchCore produced stronger and more consistent image-level detection performance across the evaluated categories. PatchCore with a `resnet50` backbone provided the strongest overall balance, matching or exceeding the other tested configurations across bottle, capsule and hazelnut. On bottle, all PatchCore backbones achieved an image AUROC of 1.0000 and an image F1-score of 0.9920. On capsule, PatchCore with `resnet50` achieved the strongest result, with an image AUROC of 0.9936 and an image F1-score of 0.9818. On hazelnut, PatchCore with `resnet50` and `wide_resnet50_2` both achieved an image AUROC of 1.0000 and an image F1-score of 0.9928.
 
-The results show that PatchCore achieved stronger image-level performance than PaDiM for the capsule category. PatchCore with `resnet50` produced the highest AUROC and F1-score in this comparison, while `wide_resnet50_2` also performed strongly. These results support the use of PatchCore as the preferred image-level anomaly detection branch in the current pipeline, while still recognising that localisation quality, semantic interpretation and review workload must also be considered when evaluating operational suitability.
+Based on these results, PatchCore with `resnet50` was selected as the preferred image-level anomaly detection architecture for the dissertation pipeline. PaDiM remained an important comparative baseline and localisation reference, but it produced weaker image-level performance in the tested architecture comparison, particularly on hazelnut.
 
 ### Integrated bottle results
 
