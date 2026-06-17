@@ -320,3 +320,13 @@ The dashboard supports:
 * review-based release after false-positive confirmation.
 
 This provides a practical demonstration of the proposed human-in-the-loop inspection workflow.
+
+
+## Dissertation writing support notes
+
+Several writing-support notes are included to connect the implemented prototype to the dissertation structure:
+
+- `docs/writing/methodology_chapter_alignment_note.md` explains how the implemented pipeline aligns with the dissertation methodology.
+- `docs/writing/results_and_discussion_placement_note.md` identifies where the architecture comparison, image-level results, localisation results, semantic interpretation, QA disposition logic, PostgreSQL audit logging, FastAPI/NiceGUI dashboard and evidence-linked review panel should be discussed in the final dissertation.
+- `docs/experiments/architecture_comparison/all_categories_architecture_comparison_interpretation.md` explains why PatchCore with ResNet50 was selected as the preferred image-level anomaly detection architecture.
+- `docs/experiments/evidence_linked_operator_review_panel.md` documents the evidence-linked review panel used to connect visual artefacts with operator decision-making.
