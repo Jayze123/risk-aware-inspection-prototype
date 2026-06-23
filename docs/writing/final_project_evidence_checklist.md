@@ -131,7 +131,24 @@ The dissertation should state that both PatchCore and PaDiM use feature embeddin
 | Evidence panel documented                        | Complete | `docs/experiments/evidence_linked_operator_review_panel.md` |
 | README updated with evidence-linked review panel | Complete | `README.md`                                                 |
 
-## 12. Dissertation writing support evidence
+## 12. Operational application figure evidence
+
+| Evidence item                                              | Status   | Repository evidence                                                                      |
+| ---------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------- |
+| Docker Desktop PostgreSQL service captured                 | Complete | `docs/figures/operational_application/docker_desktop_postgresql_service.png`             |
+| Docker Compose PostgreSQL health status captured           | Complete | `docs/figures/operational_application/docker_postgresql_service.png`                     |
+| FastAPI health-check response captured                     | Complete | `docs/figures/operational_application/fastapi_health_check.png`                          |
+| FastAPI OpenAPI documentation captured                     | Complete | `docs/figures/operational_application/fastapi_openapi_documentation.png`                 |
+| NiceGUI database summary captured                          | Complete | `docs/figures/operational_application/nicegui_database_summary.png`                      |
+| Bottle selected-record and QA-decision evidence captured   | Complete | `docs/figures/operational_application/nicegui_selected_record_qa_decision_bottle.png`    |
+| Capsule selected-record and QA-decision evidence captured  | Complete | `docs/figures/operational_application/nicegui_selected_record_qa_decision_capsule.png`   |
+| Hazelnut selected-record and QA-decision evidence captured | Complete | `docs/figures/operational_application/nicegui_selected_record_qa_decision_hazelnut.png`  |
+| Bottle evidence-linked review panel captured               | Complete | `docs/figures/operational_application/nicegui_evidence_linked_review_panel_bottle.png`   |
+| Capsule evidence-linked review panel captured              | Complete | `docs/figures/operational_application/nicegui_evidence_linked_review_panel_capsule.png`  |
+| Hazelnut evidence-linked review panel captured             | Complete | `docs/figures/operational_application/nicegui_evidence_linked_review_panel_hazelnut.png` |
+| Operational figure placement and captions documented       | Complete | `docs/writing/operational_application_figure_index.md`                                   |
+
+## 13. Dissertation writing support evidence
 
 | Evidence item                                   | Status   | Repository evidence                                                                                 |
 | ----------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------- |
@@ -141,7 +158,7 @@ The dissertation should state that both PatchCore and PaDiM use feature embeddin
 | Evidence-linked dashboard documentation created | Complete | `docs/experiments/evidence_linked_operator_review_panel.md`                                         |
 | README references writing support notes         | Complete | `README.md`                                                                                         |
 
-## 13. Current dissertation readiness assessment
+## 14. Current dissertation readiness assessment
 
 The project is in a strong position for dissertation write-up. It contains evidence for:
 
@@ -160,12 +177,13 @@ The project is in a strong position for dissertation write-up. It contains evide
 
 The project should be described as a prototype-level risk-aware visual inspection system. It is not a fully deployed production-line controller, because it does not physically control a conveyor, reject gate or robotic sorting mechanism. However, it demonstrates the software-side decision logic, traceability and operator workflow that could be connected to a manufacturing execution system or industrial controller after further validation.
 
-## 14. Remaining recommended actions before final write-up
+## 15. Revised remaining actions before final dissertation writing
 
-The remaining work should focus on consolidation rather than adding major new features:
+The major technical implementation and evidence-capture activities are complete. The remaining work should focus on dissertation consolidation:
 
-1. ensure all key figures are copied into `docs/figures/`;
-2. confirm that README tables match the latest CSV summaries;
-3. capture screenshots of the FastAPI documentation page and NiceGUI dashboard;
-4. prepare final dissertation figures for architecture comparison, localisation examples, dashboard workflow and QA disposition logic;
-5. begin drafting the final methodology, results and discussion chapters using the writing support notes.
+1. verify that all tables in the README and experiment notes match the latest CSV results;
+2. assign dissertation figure and table numbers to the selected results;
+3. prepare final captions and in-text references for the architecture comparison, localisation results and operational application figures;
+4. decide which supplementary figures should be placed in the dissertation appendix;
+5. begin drafting the methodology, results and discussion chapters using the repository writing-support notes;
+6. conduct a final reference, formatting and technical-consistency review before submission.
