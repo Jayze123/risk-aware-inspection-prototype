@@ -217,6 +217,16 @@ The semantic component is deliberately constrained to a fixed taxonomy. Missing 
 
 The current implementation does not physically control a conveyor, reject gate or robotic sorting mechanism. Instead, it demonstrates the decision logic and audit structure that could later be connected to production-line control systems after further validation.
 
+## Dissertation chapter drafts
+
+The repository includes the following dissertation writing artefacts:
+
+- `docs/writing/Chapter_3_Methodology_draft.docx` documents the implemented research methodology, including the PatchCore and PaDiM anomaly detection architectures, architecture parameterisation, image-level detection, localisation, constrained semantic interpretation, confidence fusion, deterministic risk assessment, human-review gating, PostgreSQL audit logging, FastAPI and the NiceGUI operator dashboard.
+
+- `docs/writing/Chapter_4_Results_and_Discussion_draft.docx` presents the experimental architecture comparison, integrated image-level detection results, localisation evaluation, localisation threshold optimisation, semantic fallback analysis, human-review workload, risk-governed quality disposition and operational application evidence.
+
+The experimental comparison identified PatchCore with a ResNet50 backbone as the preferred image-level anomaly detection configuration. It provided the strongest overall balance across the evaluated bottle, capsule and hazelnut categories. PaDiM remains an important comparative baseline and localisation reference.
+
 ## Current experiment results
 
 The current prototype has been tested on three MVTec AD categories: bottle, hazelnut and capsule. The experiments compare the initial statistical detector, threshold-tuned statistical detection, PatchCore and PaDiM after integration with the risk-aware inspection pipeline.
