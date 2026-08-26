@@ -91,11 +91,11 @@ For macOS/Linux:
 source .venv/bin/activate
 ```
 
-Install the project:
+````markdown
+Install the operational application, analysis tools and tests:
 
 ```bash
-pip install -e .
-```
+python -m pip install -e ".[app,analysis,test]"
 
 For Anomalib-based experiments, use the dedicated Anomalib environment and the relevant requirements file used for PatchCore and PaDiM runs.
 
