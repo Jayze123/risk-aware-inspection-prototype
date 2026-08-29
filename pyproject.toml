@@ -17,7 +17,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-api = ["fastapi>=0.110", "uvicorn>=0.27"]
+app = [
+    "fastapi>=0.110,<1.0",
+    "uvicorn>=0.27,<1.0",
+    "nicegui>=3.16,<4.0",
+    "psycopg[binary]>=3.3,<4.0",
+]
+analysis = ["matplotlib>=3.8,<3.11"]
 ml = ["torch>=2.1"]
 test = ["pytest>=7.0"]
 

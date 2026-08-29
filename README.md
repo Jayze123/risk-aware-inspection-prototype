@@ -60,7 +60,7 @@ risk_aware_inspection_prototype/
 │       └── detectors/
 │           ├── base.py
 │           ├── simple_statistical.py
-│           └── anomalib_adapter.py
+│
 ├── tests/
 ├── docker-compose.yml
 ├── requirements.txt
@@ -91,11 +91,11 @@ For macOS/Linux:
 source .venv/bin/activate
 ```
 
-Install the project:
+````markdown
+Install the operational application, analysis tools and tests:
 
 ```bash
-pip install -e .
-```
+python -m pip install -e ".[app,analysis,test]"
 
 For Anomalib-based experiments, use the dedicated Anomalib environment and the relevant requirements file used for PatchCore and PaDiM runs.
 
@@ -217,15 +217,13 @@ The semantic component is deliberately constrained to a fixed taxonomy. Missing 
 
 The current implementation does not physically control a conveyor, reject gate or robotic sorting mechanism. Instead, it demonstrates the decision logic and audit structure that could later be connected to production-line control systems after further validation.
 
-## Dissertation chapter drafts
+## Final experimental evidence
 
-The repository includes the following dissertation writing artefacts:
+Portable final-result records are available in [`evidence/`](evidence/README.md). The six CSV files preserve the final 650 evaluated MVTec AD records across bottle, capsule and hazelnut for PatchCore and PaDiM, including detection, localisation, semantic, confidence, risk and review-routing fields.
 
-- `docs/writing/Chapter_3_Methodology_draft.docx` documents the implemented research methodology, including the PatchCore and PaDiM anomaly detection architectures, architecture parameterisation, image-level detection, localisation, constrained semantic interpretation, confidence fusion, deterministic risk assessment, human-review gating, PostgreSQL audit logging, FastAPI and the NiceGUI operator dashboard.
+The evidence package contains 370 review-required records and uses portable dataset paths. Experimental values are unchanged from the original ignored output files; only machine-specific path formatting was normalised.
 
-- `docs/writing/Chapter_4_Results_and_Discussion_draft.docx` presents the experimental architecture comparison, integrated image-level detection results, localisation evaluation, localisation threshold optimisation, semantic fallback analysis, human-review workload, risk-governed quality disposition and operational application evidence.
-
-The experimental comparison identified PatchCore with a ResNet50 backbone as the preferred image-level anomaly detection configuration. It provided the strongest overall balance across the evaluated bottle, capsule and hazelnut categories. PaDiM remains an important comparative baseline and localisation reference.
+The experimental comparison identified PatchCore with a ResNet50 backbone as the preferred image-level anomaly-detection configuration. PaDiM remains an important comparative baseline and localisation reference.
 
 ## Current experiment results
 
@@ -295,10 +293,12 @@ The localisation results show that PaDiM produced stronger default mask alignmen
 
 A localisation threshold sweep was added for the capsule category to test whether anomaly-map post-processing could improve IoU and Dice without retraining the detector.
 
-| Model             | Original mean IoU | Tuned mean IoU | Original mean Dice | Tuned mean Dice | Best threshold |
+| Model | Original mean IoU | Best tuned mean IoU | Original mean Dice | Best tuned mean Dice | IoU-optimal threshold |
 | ----------------- | ----------------: | -------------: | -----------------: | --------------: | -------------: |
 | PatchCore capsule |            0.1068 |         0.2979 |             0.1671 |          0.4311 |           0.85 |
 | PaDiM capsule     |            0.1731 |         0.1830 |             0.2673 |          0.2751 |           0.55 |
+
+The tuned IoU and Dice columns report each metric's independent maximum and may therefore correspond to different thresholds. For PaDiM capsule, the best mean IoU was 0.1830 at threshold 0.55, while the best mean Dice was 0.2751 at threshold 0.50.
 
 The result shows that PatchCore capsule localisation improved substantially after threshold tuning, while PaDiM improved only slightly. This suggests that PatchCore anomaly maps contained useful localisation information, but the original binary mask conversion was not optimal.
 
@@ -332,11 +332,10 @@ The dashboard supports:
 This provides a practical demonstration of the proposed human-in-the-loop inspection workflow.
 
 
-## Dissertation writing support notes
+## Supporting technical documentation
 
-Several writing-support notes are included to connect the implemented prototype to the dissertation structure:
+The following documentation connects the implemented prototype with the reported experimental and operational evidence:
 
-- `docs/writing/methodology_chapter_alignment_note.md` explains how the implemented pipeline aligns with the dissertation methodology.
-- `docs/writing/results_and_discussion_placement_note.md` identifies where the architecture comparison, image-level results, localisation results, semantic interpretation, QA disposition logic, PostgreSQL audit logging, FastAPI/NiceGUI dashboard and evidence-linked review panel should be discussed in the final dissertation.
-- `docs/experiments/architecture_comparison/all_categories_architecture_comparison_interpretation.md` explains why PatchCore with ResNet50 was selected as the preferred image-level anomaly detection architecture.
-- `docs/experiments/evidence_linked_operator_review_panel.md` documents the evidence-linked review panel used to connect visual artefacts with operator decision-making.
+- [`docs/experiments/architecture_comparison/all_categories_architecture_comparison_interpretation.md`](docs/experiments/architecture_comparison/all_categories_architecture_comparison_interpretation.md) explains why PatchCore with ResNet50 was selected as the preferred image-level anomaly-detection architecture.
+- [`docs/experiments/evidence_linked_operator_review_panel.md`](docs/experiments/evidence_linked_operator_review_panel.md) documents the evidence-linked operator-review panel connecting visual artefacts with operator decision-making.
+- [`evidence/README.md`](evidence/README.md) documents the six portable final-result files, record counts, review-routing counts and path-normalisation checks.

@@ -465,4 +465,5 @@ save_review_button.on_click(save_review)
 refresh_summary()
 refresh_records()
 
-ui.run(host="127.0.0.1", port=8090, reload=False)
+if __name__ == "__main__":
+    ui.run(host="127.0.0.1", port=8090, reload=False)
