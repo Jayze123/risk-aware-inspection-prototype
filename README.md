@@ -293,10 +293,12 @@ The localisation results show that PaDiM produced stronger default mask alignmen
 
 A localisation threshold sweep was added for the capsule category to test whether anomaly-map post-processing could improve IoU and Dice without retraining the detector.
 
-| Model             | Original mean IoU | Tuned mean IoU | Original mean Dice | Tuned mean Dice | Best threshold |
+| Model | Original mean IoU | Best tuned mean IoU | Original mean Dice | Best tuned mean Dice | IoU-optimal threshold |
 | ----------------- | ----------------: | -------------: | -----------------: | --------------: | -------------: |
 | PatchCore capsule |            0.1068 |         0.2979 |             0.1671 |          0.4311 |           0.85 |
 | PaDiM capsule     |            0.1731 |         0.1830 |             0.2673 |          0.2751 |           0.55 |
+
+The tuned IoU and Dice columns report each metric's independent maximum and may therefore correspond to different thresholds. For PaDiM capsule, the best mean IoU was 0.1830 at threshold 0.55, while the best mean Dice was 0.2751 at threshold 0.50.
 
 The result shows that PatchCore capsule localisation improved substantially after threshold tuning, while PaDiM improved only slightly. This suggests that PatchCore anomaly maps contained useful localisation information, but the original binary mask conversion was not optimal.
 
