@@ -91,11 +91,11 @@ For macOS/Linux:
 source .venv/bin/activate
 ```
 
-````markdown
 Install the operational application, analysis tools and tests:
 
 ```bash
 python -m pip install -e ".[app,analysis,test]"
+```
 
 For Anomalib-based experiments, use the dedicated Anomalib environment and the relevant requirements file used for PatchCore and PaDiM runs.
 
@@ -340,7 +340,7 @@ The following documentation connects the implemented prototype with the reported
 - [`docs/experiments/evidence_linked_operator_review_panel.md`](docs/experiments/evidence_linked_operator_review_panel.md) documents the evidence-linked operator-review panel connecting visual artefacts with operator decision-making.
 - [`evidence/README.md`](evidence/README.md) documents the six portable final-result files, record counts, review-routing counts and path-normalisation checks.
 
-## Citation
+## Citations
 
 If you use this repository, its software, experimental evidence or dissertation in academic work, please cite:
 
