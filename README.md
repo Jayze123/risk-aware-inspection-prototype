@@ -1,6 +1,6 @@
 # Risk-Aware Vision Pipeline Prototype
 
-This repository contains a VS Code-compatible research prototype for the MSc dissertation project titled **Risk-Aware Vision Pipeline for Industrial Visual Inspection and Anomaly Detection**.
+This repository contains a VS Code-compatible research prototype for the MSc dissertation project titled **Development and Evaluation of a Risk-Aware Visual Inspection Framework for Industrial Anomaly Detection** — [View the dissertation PDF](docs/dissertation/Jesse_Asemota_MSc_Dissertation_2026.pdf).
 
 The project implements a risk-aware industrial inspection workflow that combines anomaly detection, localisation, semantic interpretation, risk classification, human-review gating, audit logging and operator-facing decision support. The purpose of the prototype is to evaluate how anomaly detection outputs can be extended into a more operationally useful inspection framework, rather than treating defect detection as a standalone classification task.
 
@@ -339,3 +339,29 @@ The following documentation connects the implemented prototype with the reported
 - [`docs/experiments/architecture_comparison/all_categories_architecture_comparison_interpretation.md`](docs/experiments/architecture_comparison/all_categories_architecture_comparison_interpretation.md) explains why PatchCore with ResNet50 was selected as the preferred image-level anomaly-detection architecture.
 - [`docs/experiments/evidence_linked_operator_review_panel.md`](docs/experiments/evidence_linked_operator_review_panel.md) documents the evidence-linked operator-review panel connecting visual artefacts with operator decision-making.
 - [`evidence/README.md`](evidence/README.md) documents the six portable final-result files, record counts, review-routing counts and path-normalisation checks.
+
+## Citation
+
+If you use this repository, its software, experimental evidence or dissertation in academic work, please cite:
+
+**Harvard citation**
+
+Asemota, J. and Bazazian, D. (2026) *Development and evaluation of a risk-aware visual inspection framework for industrial anomaly detection*. MSc Robotics dissertation. University of Plymouth.
+
+**BibTeX**
+
+```bibtex
+@mastersthesis{asemota2026riskaware,
+  title={Development and Evaluation of a Risk-Aware Visual Inspection Framework for Industrial Anomaly Detection},
+  author={Asemota, Jesse and Bazazian, Dena},
+  organisation={University of Plymouth},
+  year={2026},
+  type={MSc Robotics dissertation}
+}
+```
+
+## License
+
+The source code in this repository is licensed under the [MIT License](LICENSE).
+
+The dissertation PDF is provided for scholarly reading and citation and remains subject to its applicable academic copyright terms.
