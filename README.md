@@ -354,7 +354,7 @@ Asemota, J. and Bazazian, D. (2026) *Development and evaluation of a risk-aware 
 @mastersthesis{asemota2026riskaware,
   title={Development and Evaluation of a Risk-Aware Visual Inspection Framework for Industrial Anomaly Detection},
   author={Asemota, Jesse and Bazazian, Dena},
-  organisation={University of Plymouth},
+  organization={University of Plymouth},
   year={2026},
   type={MSc Robotics dissertation}
 }
